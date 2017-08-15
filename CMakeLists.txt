@@ -1,3 +1,5 @@
+
+# Required CMake version
 cmake_minimum_required(VERSION 3.5)
 
 # Project setting
@@ -5,7 +7,7 @@ message("** Scanning System")
 
 # Setup project name and programming language
 project(nuclear C)
-set(PROJECT_VERSION "1.0")
+set(PROJECT_VERSION "0.1.0")
 
 # Default build-type is 'Release'
 set(Profile "Profile")
@@ -45,14 +47,12 @@ set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
 
 # Required CMake packages
 find_package(PkgConfig REQUIRED)
-find_package (Threads REQUIRED)
 
 # Setting up Glib 2.0
 pkg_check_modules(GLIB REQUIRED glib-2.0>=2.30)
 include_directories(${GLIB_INCLUDE_DIRS})
 link_directories(${GLIB_LIBRARY_DIRS})
 add_definitions(${GLIB_CFLAGS_OTHER})
-link_libraries(${CMAKE_THREAD_LIBS_INIT})
 
 # Setting up Gtk+ 3.0
 pkg_check_modules(GTK3 REQUIRED gtk+-3.0>=3.0)

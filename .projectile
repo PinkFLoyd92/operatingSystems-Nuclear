@@ -1,0 +1,5 @@
+src/nuclear
+src/reactor/reactor.o
+src/ui/ui.o
+GTAGS
+build/

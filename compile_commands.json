@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/sebas/Projects/operativos/build/src",
+  "command": "/usr/bin/cc  -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/gdk-pixbuf-2.0 -I/home/sebas/Projects/operativos/build/src   -Wall -Wextra -std=c11 -O3 -DNDEBUG   -pthread -o CMakeFiles/nuclear.dir/main.c.o   -c /home/sebas/Projects/operativos/src/main.c",
+  "file": "/home/sebas/Projects/operativos/src/main.c"
+},
+{
+  "directory": "/home/sebas/Projects/operativos/build/src",
+  "command": "/usr/bin/cc  -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/gdk-pixbuf-2.0 -I/home/sebas/Projects/operativos/build/src   -Wall -Wextra -std=c11 -O3 -DNDEBUG   -pthread -o CMakeFiles/nuclear.dir/ui/main_window.c.o   -c /home/sebas/Projects/operativos/src/ui/main_window.c",
+  "file": "/home/sebas/Projects/operativos/src/ui/main_window.c"
+},
+{
+  "directory": "/home/sebas/Projects/operativos/build/src",
+  "command": "/usr/bin/cc  -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/gdk-pixbuf-2.0 -I/home/sebas/Projects/operativos/build/src   -Wall -Wextra -std=c11 -O3 -DNDEBUG   -pthread -o CMakeFiles/nuclear.dir/reactor/reactor.c.o   -c /home/sebas/Projects/operativos/src/reactor/reactor.c",
+  "file": "/home/sebas/Projects/operativos/src/reactor/reactor.c"
+}
+]

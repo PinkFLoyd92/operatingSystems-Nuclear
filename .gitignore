@@ -45,3 +45,7 @@
 # Others
 *~
 build/
+GTAGS
+src/reactor/reactor.o
+src/ui/ui.o
+src/nuclear
