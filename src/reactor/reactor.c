@@ -36,13 +36,32 @@ start_threads(struct bar* bars){
 }
 
 
-void
+void*
 check_stable(void* bars){
   struct bar* wires = (struct bar*) bars ;
-  for (int i = 0; i < NUM_THREADS; ++i) {
-    printf("Wire Value: %ld", wires[i].id);
-  }
+  while (true) {
+    double k_total = 0.0;
+    pthread_mutex_lock(&bar_mutex);
+    for (int i = 0; i < NUM_THREADS; ++i) {
+      k_total += getDeltaKValue(wires[i].cm);
+    }
+    pthread_mutex_unlock(&bar_mutex);
 
+    // pthread_mutex_lock(&write_mutex);
+    // printf("\nValor del delta: %lf\n", k_total);
+    k_total = k_value + k_total;
+    // pthread_mutex_unlock(&write_mutex);
+    if(k_total != 1.0){
+      unbalanced = true;
+      printf("\nState: %lf", k_total);
+      print_bars(bars);
+      sleep(1);
+      pthread_cond_signal(&unstable_state);
+    }else{
+      printf("LALALAL BALANCED");
+      unbalanced = false;
+    }
+  }
 }
 
 /* TODO: Validar rango de valor a desastibilizar, 
@@ -50,75 +69,62 @@ check_stable(void* bars){
    Manejo de excepciones */
 double
 read_unstable_value(){
-  pthread_mutex_lock(&write_mutex);
+  // pthread_mutex_lock(&write_mutex);
   printf("\nEnter the value to unstabilize the system: ");
   scanf("%lf", &unstable_value);
   k_value = k_value + unstable_value; // de una vez calculamos el valor de k
-  pthread_mutex_unlock(&write_mutex);
+  // pthread_mutex_unlock(&write_mutex);
+  return k_value;
 }
 
 // TODO: MOVER LA BARRA... CONSIDERAR TIEMPOS PARA LA TERMINACION DE LA RUTINA DEL THREAD
 void*
 move_bar(void *bar){
   struct bar* b = (struct bar*) bar ;
-  double delta_k = 0.0;
-  int future_cm = 0;
   clock_t start_t;
   bool changed_direction = false;
   printf("Starting bar thread: id-> %ld", b->id);
   while(true){
     pthread_mutex_lock(&bar_mutex);
     //cuando se encuentre desbalanceado podremos ingresar y editar.
-    while(!unbalanced)
+    while(unbalanced == false)
       pthread_cond_wait(&unstable_state, &bar_mutex);
 
     start_t = clock(); //we begin to run the clock
     //printf("Moviendo barra usando el hilo: %ld\n", my_id);
-    if (*(b->k_value) > 1) {
-      future_cm = 10 + b->cm; //Usando este valor calculamos el deltak
-      delta_k = getDeltaKValue(future_cm);
-      if(b->direction == DOWN){
-        b->direction = UP;
-        changed_direction = true;
-      }else{
-        changed_direction = false;
-      }
-      *(b->k_value) -= delta_k;
-       
-    }else if((*(b->k_value) < 1) ){
-      future_cm = b->cm - 10; //Usando este valor calculamos el deltak
-      delta_k = getDeltaKValue(future_cm);
-      *(b->k_value) -= delta_k;
+    if (k_value < 1 && b->cm <=20) {
+      b->cm = b->cm + 10; //Usando este valor calculamos el deltak
+      printf("\nThread yendo hacia abajo\n");
       if(b->direction == UP){
         b->direction = DOWN;
         changed_direction = true;
       }else{
         changed_direction = false;
       }
-
+    }else if(k_value > 1 && b->cm >=-20){
+      b->cm = b->cm - 10; //Usando este valor calculamos el deltak
+      printf("\nThread yendo hacia arriba\n");
+      if(b->direction == DOWN){
+        b->direction = UP;
+        changed_direction = true;
+      }else{
+        changed_direction = false;
+      }
     }
+    //print_bars(bars);
+    sleep(1);
     //modificamos el valor de la barra
     //revisamos si debemos hacer el movimiento hacia arriba o abajo
     pthread_mutex_unlock(&bar_mutex);
-    if(changed_direction){
-      printf("We have to change the direction");
-      while((clock() - start_t)/CLOCKS_PER_SEC < CHANGE_DIRECTION); // changing direction
-    }
-    start_t = clock();
-    while((clock() - start_t)/CLOCKS_PER_SEC < MOVEMENT_TIME); // bar's movement
-    changed_direction = false;
+    // if(changed_direction){
+    //   printf("We have to change the direction");
+    //   while((clock() - start_t)/CLOCKS_PER_SEC < CHANGE_DIRECTION); // changing direction
+    // }
+    // start_t = clock();
+    // while((clock() - start_t)/CLOCKS_PER_SEC < MOVEMENT_TIME); // bar's movement
+    // changed_direction = false;
   }
   pthread_exit(NULL);
-}
-
-void*
-unstabilize(double value){
-     pthread_mutex_lock(&bar_mutex);
-     /* read new value  and change variable unstable_value*/
-     // change balanced to false
-     pthread_cond_signal(&unstable_state);
-     pthread_mutex_unlock(&bar_mutex);
-
 }
 
 /*
@@ -133,7 +139,7 @@ fill_bar(struct bar* b, long id){
 
 // TODO: retornar el delta k dependiendo de la distancia dada
 double
-getdeltakvalue(int cm){
+getDeltaKValue(int cm){
   switch (cm) {
 
   case 0: {
@@ -172,6 +178,14 @@ void init_variables(){
   timeUnstabilized = 0.0;
   unbalanced = false;
   unstable_value = 0.0;
-  k_value = 0.0;
-  k_total = 0.0;
+  k_value = 1.0;
+}
+
+void
+print_bars(struct bar* bars){
+  for (int i = 0; i < NUM_THREADS; ++i) {
+    printf("\nBARRA: ");
+    printf("\nID: %ld", bars[i].id);
+    printf("\nCM: %d", bars[i].cm);
+  }
 }

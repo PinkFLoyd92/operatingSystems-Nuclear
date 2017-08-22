@@ -18,7 +18,7 @@ pthread_mutex_t write_mutex;  //mutex for handling the movement of each bar
 pthread_cond_t unstable_state; //condition variable 
 pthread_attr_t attr;
 bool unbalanced;
-double unstable_value, k_value, k_total;
+double unstable_value, k_value;
 struct bar* bars;
 
 struct bar{
@@ -34,9 +34,6 @@ move_bar(void *bar);
 void*
 count_time(void *time);
 
-void*
-unstabilize(double value); 
-
 void
 start_threads(struct bar* bars);
 
@@ -51,6 +48,9 @@ fill_bar(struct bar* b, long id);
 void
 init_variables();
 
-void
+void*
 check_stable(void* bars);
+
+void
+print_bars(struct bar* bars);
 #endif

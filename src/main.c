@@ -10,6 +10,7 @@ main (int argc, char **argv) {
   /* Starting the application */
   pthread_attr_destroy(&attr);
   pthread_mutex_destroy(&bar_mutex);
+  pthread_mutex_destroy(&write_mutex);
   pthread_cond_destroy(&unstable_state);
   pthread_exit(NULL);
 
