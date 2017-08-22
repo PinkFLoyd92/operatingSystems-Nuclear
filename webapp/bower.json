@@ -1,0 +1,21 @@
+{
+  "name": "nodejs",
+  "description": "Testing realtime",
+  "main": "index.js",
+  "authors": [
+    "pinkfloyd92 <ascacere@espol.edu.ec>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "socket.io-client": "^2.0.3"
+  }
+}
