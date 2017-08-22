@@ -15,10 +15,10 @@ enum Direction {UP = 1, DOWN = 0};
 double timeUnstabilized;
 pthread_mutex_t bar_mutex;  //mutex for handling the movement of each bar
 pthread_mutex_t write_mutex;  //mutex for handling the movement of each bar
-pthread_cond_t unstable_state; //condition variable 
+pthread_cond_t unstable_state, writer_state; //condition variable 
 pthread_attr_t attr;
-bool unbalanced;
-double unstable_value, k_value;
+bool unbalanced, isWriting;
+double unstable_value, k_value, k_total;
 struct bar* bars;
 
 struct bar{

@@ -40,27 +40,25 @@ void*
 check_stable(void* bars){
   struct bar* wires = (struct bar*) bars ;
   while (true) {
-    double k_total = 0.0;
-    pthread_mutex_lock(&bar_mutex);
+    k_total = 0.0;
+    pthread_mutex_trylock(&bar_mutex);
     for (int i = 0; i < NUM_THREADS; ++i) {
       k_total += getDeltaKValue(wires[i].cm);
     }
-    pthread_mutex_unlock(&bar_mutex);
 
-    // pthread_mutex_lock(&write_mutex);
-    // printf("\nValor del delta: %lf\n", k_total);
     k_total = k_value + k_total;
-    // pthread_mutex_unlock(&write_mutex);
+    printf("\nValor del k_total: %lf\n", k_total);
     if(k_total != 1.0){
       unbalanced = true;
-      printf("\nState: %lf", k_total);
+      printf("\nState k_total: %lf, ", k_total);
       print_bars(bars);
-      sleep(1);
-      pthread_cond_signal(&unstable_state);
+      pthread_cond_broadcast(&unstable_state);
     }else{
-      printf("LALALAL BALANCED");
+      printf("\nBALANCED");
       unbalanced = false;
     }
+    pthread_mutex_unlock(&bar_mutex);
+    sleep(1);
   }
 }
 
@@ -85,14 +83,13 @@ move_bar(void *bar){
   bool changed_direction = false;
   printf("Starting bar thread: id-> %ld", b->id);
   while(true){
-    pthread_mutex_lock(&bar_mutex);
+    pthread_mutex_trylock(&bar_mutex);
     //cuando se encuentre desbalanceado podremos ingresar y editar.
     while(unbalanced == false)
       pthread_cond_wait(&unstable_state, &bar_mutex);
 
     start_t = clock(); //we begin to run the clock
-    //printf("Moviendo barra usando el hilo: %ld\n", my_id);
-    if (k_value < 1 && b->cm <=20) {
+    if (k_total < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
       printf("\nThread yendo hacia abajo\n");
       if(b->direction == UP){
@@ -101,7 +98,7 @@ move_bar(void *bar){
       }else{
         changed_direction = false;
       }
-    }else if(k_value > 1 && b->cm >=-20){
+    }else if(k_total > 1 && b->cm >=-20){
       b->cm = b->cm - 10; //Usando este valor calculamos el deltak
       printf("\nThread yendo hacia arriba\n");
       if(b->direction == DOWN){
@@ -111,11 +108,25 @@ move_bar(void *bar){
         changed_direction = false;
       }
     }
-    //print_bars(bars);
-    sleep(1);
-    //modificamos el valor de la barra
-    //revisamos si debemos hacer el movimiento hacia arriba o abajo
+    // calculo de k_total
+    k_total = 0.0;
+    for (int i = 0; i < NUM_THREADS; ++i) {
+      k_total += getDeltaKValue(bars[i].cm);
+    }
+
+    k_total = k_value + k_total;
+    printf("\nValor del k_total, %lf k_value: %lf\n", k_total);
+    print_bars(bars);
+    if(k_total != 1.0){
+      unbalanced = true;
+      printf("\nUNBALANCED");
+      pthread_cond_broadcast(&unstable_state);
+    }else{
+      printf("\nBALANCED");
+      unbalanced = false;
+    }
     pthread_mutex_unlock(&bar_mutex);
+    sleep(1);
     // if(changed_direction){
     //   printf("We have to change the direction");
     //   while((clock() - start_t)/CLOCKS_PER_SEC < CHANGE_DIRECTION); // changing direction
