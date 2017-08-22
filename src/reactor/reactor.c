@@ -115,6 +115,7 @@ move_bar(void *bar){
     }
 
     k_total = k_value + k_total;
+    doPost("LLALALALA");
     printf("\nValor del k_total, %lf k_value: %lf\n", k_total);
     print_bars(bars);
     if(k_total != 1.0){

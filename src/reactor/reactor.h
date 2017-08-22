@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <pthread.h>
+#include "../socket/socket.h"
 
 #define NUM_THREADS 4
 #define MAX_BALANCE_TIME  10 // max of 5 seconds to balance the system
