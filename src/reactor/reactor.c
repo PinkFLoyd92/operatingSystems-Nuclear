@@ -4,34 +4,45 @@
 void
 start_threads(struct bar* bars){
   int i;
-  pthread_t threads[NUM_THREADS];
-  unstable_value = 0.0;
-  k_value = 0.0;
+  pthread_t threads[NUM_THREADS + 1];
+  init_variables();
   pthread_mutex_init(&bar_mutex, NULL);
+  pthread_mutex_init(&write_mutex, NULL);
   pthread_cond_init(&unstable_state, NULL);
 
-  for (i = 1; i < 5; i++) {
-    fill_bar(&bars[i - 1], i, &k_value);
+  for (i = 1; i < NUM_THREADS + 1; i++) {
+    fill_bar(&bars[i - 1], i);
   }
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  pthread_create(&threads[0], &attr, move_bar, (void *)&bars[0]);
-  pthread_create(&threads[1], &attr, move_bar, (void *)&bars[1]);
-  pthread_create(&threads[2], &attr, move_bar, (void *)&bars[2]);
-  pthread_create(&threads[3], &attr, move_bar, (void *)&bars[3]);
+  // creating the 4 threads that handle each bar
+  for (i = 0; i < NUM_THREADS; i++) {
+  pthread_create(&threads[i], &attr, move_bar, (void *)&bars[i]);
+  }
+  //thread used to check if system is stable and change its k_total
+  pthread_create(&threads[NUM_THREADS], &attr, check_stable, (void *)bars);
 
-
-  printf("\nK - Value is: %lf", k_value);
-  printf("\nREADING VALUE FROM USER: ");
   while(true){
+    printf("\nREADING VALUE FROM USER: ");
     unstable_value = read_unstable_value();
+    printf("\nValor leido: %lf\n", unstable_value);
   }
   
   /* Wait for all threads to complete */
-  for (i=0; i<NUM_THREADS; i++) {
+  for (i=0; i<NUM_THREADS + 1; i++) {
     pthread_join(threads[i], NULL);
   }
+}
+
+
+void
+check_stable(void* bars){
+  struct bar* wires = (struct bar*) bars ;
+  for (int i = 0; i < NUM_THREADS; ++i) {
+    printf("Wire Value: %ld", wires[i].id);
+  }
+
 }
 
 /* TODO: Validar rango de valor a desastibilizar, 
@@ -39,10 +50,11 @@ start_threads(struct bar* bars){
    Manejo de excepciones */
 double
 read_unstable_value(){
-  double val = 0;
+  pthread_mutex_lock(&write_mutex);
   printf("\nEnter the value to unstabilize the system: ");
-  scanf("%lf", &val);
-  return val;
+  scanf("%lf", &unstable_value);
+  k_value = k_value + unstable_value; // de una vez calculamos el valor de k
+  pthread_mutex_unlock(&write_mutex);
 }
 
 // TODO: MOVER LA BARRA... CONSIDERAR TIEMPOS PARA LA TERMINACION DE LA RUTINA DEL THREAD
@@ -113,14 +125,53 @@ unstabilize(double value){
 TODO: verificar que se llenen exitosamente estos datos
 */ 
 void
-fill_bar(struct bar* b, long id, double* k_value){
+fill_bar(struct bar* b, long id){
   b->id = id;
-  b->k_value = k_value;
+  b->cm = 0;
   b->direction = DOWN;
 }
 
 // TODO: retornar el delta k dependiendo de la distancia dada
 double
 getdeltakvalue(int cm){
-  return 1.0;
+  switch (cm) {
+
+  case 0: {
+    return 0;
+  }
+
+  case 10: {
+    return 0.1;
+  }
+  case 20: {
+    return 0.4;
+  }
+  case 30: {
+    return 0.6;
+  }
+
+  case -10: {
+    return -0.1;
+  }
+
+  case -20: {
+    return -0.4;
+  }
+
+  case -30: {
+    return -0.6;
+  }
+
+default:
+  return 0;
+  }
+
+}
+
+void init_variables(){
+  timeUnstabilized = 0.0;
+  unbalanced = false;
+  unstable_value = 0.0;
+  k_value = 0.0;
+  k_total = 0.0;
 }

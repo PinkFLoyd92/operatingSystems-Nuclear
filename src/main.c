@@ -4,7 +4,7 @@
 
 int
 main (int argc, char **argv) {
-  struct bar* bars = (struct bar*)malloc(sizeof(struct bar) * NUM_THREADS);
+  bars = (struct bar*)malloc(sizeof(struct bar) * NUM_THREADS);
   /* Starting the bar threads */
   start_threads(bars);
   /* Starting the application */
