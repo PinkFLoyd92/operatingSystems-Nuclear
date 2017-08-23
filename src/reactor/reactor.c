@@ -51,8 +51,8 @@ check_stable(void* bars){
     // printf("\nValor del k_total: %lf\n", k_total);
     if((double)k_total != (double)1.0){
       unbalanced = true;
-      // printf("\nState k_total: %lf, ", k_total);
-      pthread_cond_broadcast(&unstable_state);
+       printf("\nUnbalanced");
+       pthread_cond_broadcast(&unstable_state);
     }else{
       printf("\nBALANCED");
       unbalanced = false;
@@ -84,8 +84,9 @@ move_bar(void *bar){
   bool changed_direction = false;
   printf("Starting bar thread: id-> %ld", b->id);
   while(true){
-    pthread_mutex_lock(&bar_mutex);
+    pthread_mutex_trylock(&bar_mutex);
     //cuando se encuentre desbalanceado podremos ingresar y editar.
+    printf("\nThread %ld is trying to star..................\n", b->id);
     while(unbalanced == false)
       pthread_cond_wait(&unstable_state, &bar_mutex);
 
@@ -115,10 +116,15 @@ move_bar(void *bar){
     for (int i = 0; i < NUM_THREADS; ++i) {
       k_total += getDeltaKValue(bars[i].cm);
     }
-
-    k_total = k_value + k_total;
-    /* Thread ID, bar CM*/
     char str[25];
+    sprintf(str,"deltak=%lf", k_total);
+    doPost("deltak",str);
+    k_total = k_value + k_total;
+    sprintf(str,"kparcial=%lf",k_value);
+    doPost("kparcial",str);
+    sprintf(str,"ktotal=%lf", k_total);
+    doPost("ktotal",str);
+    /* Thread ID, bar CM*/
     // printf("\nValor del k_total, %lf \n", k_total);
     // printf("\n%lf, %lf", (double)k_total, (double)1.0);
     // print_bars(bars);

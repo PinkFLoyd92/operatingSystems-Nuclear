@@ -1,6 +1,12 @@
 var socket = io('http://localhost:9000');
-socket.on('state', function (x){
-    console.info(x.resource)
+socket.on('ktotal', function (x){
+    $( "#ktotal" ).text(x.resource.ktotal );
+})
+socket.on('kparcial', function (x){
+    $( "#kparcial" ).text(x.resource.kparcial );
+})
+socket.on('deltak', function (x) {
+    $( "#deltak" ).text(x.resource.deltak );
 })
 socket.on('barValue', function (x) {
     console.info(x.resource)

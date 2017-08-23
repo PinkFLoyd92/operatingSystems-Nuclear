@@ -31,9 +31,26 @@ app.io = io;
 app.post('/barValue', function(req, res) {
     console.log(req.body)
     req.app.io.emit('barValue', {resource:req.body});
-    console.log("new Bar Value coming from C");
     res.send('');
 });
+app.post('/deltak', function(req, res) {
+    console.log(req.body)
+    req.app.io.emit('deltak', {resource:req.body});
+    res.send('');
+});
+
+app.post('/kparcial', function(req, res) {
+    console.log(req.body)
+    req.app.io.emit('kparcial', {resource:req.body});
+    res.send('');
+});
+
+app.post('/ktotal', function(req, res) {
+    console.log(req.body)
+    req.app.io.emit('ktotal', {resource:req.body});
+    res.send('');
+});
+
 app.listen(3000);
 
 io.set('origins', '*:*');
