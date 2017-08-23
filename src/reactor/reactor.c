@@ -115,10 +115,13 @@ move_bar(void *bar){
     }
 
     k_total = k_value + k_total;
-    doPost("LLALALALA");
-    printf("\nValor del k_total, %lf k_value: %lf\n", k_total);
+    /* Thread ID, bar CM*/
+    char str[80];
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
+    doPost(str);
+    printf("\nValor del k_total, %lf \n", k_total);
     print_bars(bars);
-    if(k_total != 1.0){
+    if((double)k_total != (double)1.0){
       unbalanced = true;
       printf("\nUNBALANCED");
       pthread_cond_broadcast(&unstable_state);

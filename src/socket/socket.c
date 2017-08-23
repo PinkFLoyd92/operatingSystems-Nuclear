@@ -17,7 +17,7 @@ doPost(char* param) {
        data. */ 
     curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:3000/barValue");
     /* Now specify the POST data */ 
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=daniel&project=curl");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, param);
  
     /* Perform the request, res will get the return code */ 
     res = curl_easy_perform(curl);

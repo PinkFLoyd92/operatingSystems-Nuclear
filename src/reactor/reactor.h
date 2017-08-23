@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <pthread.h>
+#include <string.h>
 #include "../socket/socket.h"
 
 #define NUM_THREADS 4
