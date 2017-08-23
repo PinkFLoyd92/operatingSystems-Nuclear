@@ -5,7 +5,7 @@ UI_DIR="ui"
 SOCKET_DIR="socket"
 
 all: ui.o socket.o reactor.o 
-	$(CC) `pkg-config --cflags gtk+-3.0` main.c $(UI_DIR)/ui.o $(SOCKET_DIR)/socket.o $(REACTOR_DIR)/reactor.o -g -o nuclear `pkg-config --libs gtk+-3.0` -lpthread -lcurl
+	$(CC) main.c $(UI_DIR)/ui.o $(SOCKET_DIR)/socket.o $(REACTOR_DIR)/reactor.o -g -o nuclear -lpthread -lcurl
 
 ui.o:
 	$(CC) -c `pkg-config --cflags gtk+-3.0` $(UI_DIR)/main_window.c -o $(UI_DIR)/ui.o `pkg-config --libs gtk+-3.0`

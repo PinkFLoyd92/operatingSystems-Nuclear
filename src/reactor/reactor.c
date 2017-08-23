@@ -48,10 +48,9 @@ check_stable(void* bars){
 
     k_total = k_value + k_total;
     printf("\nValor del k_total: %lf\n", k_total);
-    if(k_total != 1.0){
+    if((double)k_total != (double)1.0){
       unbalanced = true;
       printf("\nState k_total: %lf, ", k_total);
-      print_bars(bars);
       pthread_cond_broadcast(&unstable_state);
     }else{
       printf("\nBALANCED");
@@ -79,7 +78,8 @@ read_unstable_value(){
 void*
 move_bar(void *bar){
   struct bar* b = (struct bar*) bar ;
-  clock_t start_t;
+  //clock_t start_t;
+  time_t start, end, duration;
   bool changed_direction = false;
   printf("Starting bar thread: id-> %ld", b->id);
   while(true){
@@ -88,7 +88,7 @@ move_bar(void *bar){
     while(unbalanced == false)
       pthread_cond_wait(&unstable_state, &bar_mutex);
 
-    start_t = clock(); //we begin to run the clock
+    start = time (0); //we begin to run the clock
     if (k_total < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
       printf("\nThread yendo hacia abajo\n");
@@ -116,10 +116,9 @@ move_bar(void *bar){
 
     k_total = k_value + k_total;
     /* Thread ID, bar CM*/
-    char str[80];
-    sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
-    doPost(str);
+    char str[25];
     printf("\nValor del k_total, %lf \n", k_total);
+    printf("\n%lf, %lf", (double)k_total, (double)1.0);
     print_bars(bars);
     if((double)k_total != (double)1.0){
       unbalanced = true;
@@ -129,15 +128,35 @@ move_bar(void *bar){
       printf("\nBALANCED");
       unbalanced = false;
     }
+    if(changed_direction){
+      printf("\nWe have to change the direction");
+      while((time (0) - start) < CHANGE_DIRECTION); // changing direction
+    }
+    start = time (0);
+    while((time (0) - start) < MOVEMENT_TIME);
+    
+      // if (0.5 > (clock() - start_t)/CLOCKS_PER_SEC > 0.25 ) {
+      //   if (b->direction == DOWN){
+      //     sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 5);
+      //   }else{
+      //     sprintf(str,"id=%ld&cm=%d",b->id, b->cm + 5);
+      //   }
+      //   // doPost(str);
+      // }else if (1 > (clock() - start_t)/CLOCKS_PER_SEC > 0.5) {
+      //   if (b->direction == DOWN){
+      //     sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 2);
+      //   }else{
+      //     sprintf(str,"id=%ld&cm=%d",b->id, b->cm + 2);
+      //   }
+      //   // doPost(str);
+      // }
+    
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
+    doPost(str);
+    printf("\nENding thread %ld", b->id);
+    changed_direction = false;
     pthread_mutex_unlock(&bar_mutex);
     sleep(1);
-    // if(changed_direction){
-    //   printf("We have to change the direction");
-    //   while((clock() - start_t)/CLOCKS_PER_SEC < CHANGE_DIRECTION); // changing direction
-    // }
-    // start_t = clock();
-    // while((clock() - start_t)/CLOCKS_PER_SEC < MOVEMENT_TIME); // bar's movement
-    // changed_direction = false;
   }
   pthread_exit(NULL);
 }

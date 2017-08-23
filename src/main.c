@@ -1,4 +1,3 @@
-#include "ui/main_window.h"
 #include "reactor/reactor.h"
 #include <pthread.h>
 

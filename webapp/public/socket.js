@@ -1,26 +1,30 @@
 var socket = io('http://localhost:9000');
-socket.on('barValue', function (d) {
-    console.info(d.resource)
+socket.on('barValue', function (x) {
+    console.info(x.resource)
     for(var i = 0; i < data.length; i++) {
-        if (data[i].id == parseInt(d.resource.id)){
-            data[i].cm = parseInt(d.resource.cm)
+        if (data[i].id == parseInt(x.resource.id)){
+            data[i].cm = parseInt(x.resource.cm);
         }
     }
     console.info(data)
   svg.selectAll("*").remove()
-    series = d3.stack()
-        .keys(["cm"])
-        .offset(d3.stackOffsetDiverging)
-    (data);
+  series = d3.stack()
+             .keys(["cm"])
+             .offset(d3.stackOffsetDiverging)
+  (data);
+svg = d3.select("svg"),
+    margin = {top: 20, right: 30, bottom: 30, left: 60},
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
 
     x = d3.scaleBand()
         .domain(data.map(function(d) { return d.name; }))
         .rangeRound([margin.left, width - margin.right])
         .padding(0.1);
 
-    y = d3.scaleLinear()
-        .domain([d3.min(series, stackMin), d3.max(series, stackMax)])
-        .rangeRound([height - margin.bottom, margin.top]);
+var y = d3.scaleLinear()
+    .domain([d3.min(series, stackMin), d3.max(series, stackMax)])
+    .rangeRound([height - margin.bottom, margin.top]);
 
     z = d3.scaleOrdinal(d3.schemeCategory10);
 
