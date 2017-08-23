@@ -1,13 +1,13 @@
-<svg width="960" height="560"></svg>
+<svg width="960" height="500"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
-var data = [
-  {name: "Barra-1", cm: 0, id:1},
-  {name: "Barra-2", cm: 0,id:2},
-  {name: "Barra-3", cm:  0,id:3},
-  {name: "Barra-4", cm:  0,id:4}
-];
+ var data = [
+   {name: "Barra-1", cm:  0, id:1},
+   {name: "Barra-2", cm:  0, id:2},
+   {name: "Barra-3", cm:  0,  id:3},
+   {name: "Barra-4", cm:  0,  id:4}
+ ];
 
 var series = d3.stack()
     .keys(["cm"])
@@ -41,7 +41,7 @@ svg.append("g")
     .attr("width", x.bandwidth)
     .attr("x", function(d) { return x(d.data.name); })
     .attr("y", function(d) { return y(d[1]); })
-    .attr("height", function(d) { return Math.abs(y(d[0]) - y(d[1])) })
+    .attr("height", function(d) { return y(d[0]) - y(d[1]); })
 
 svg.append("g")
     .attr("transform", "translate(0," + y(0) + ")")

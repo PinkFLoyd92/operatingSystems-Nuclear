@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <curl/curl.h>
+#include "socket.h" 
  
 int
-doPost(char* param) {
+doPost(char* route, char* param) {
   CURL *curl;
   CURLcode res;
+  char url[80];
  
   /* In windows, this will init the winsock stuff */ 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -15,7 +15,9 @@ doPost(char* param) {
     /* First set the URL that is about to receive our POST. This URL can
        just as well be a https:// URL if that is what should receive the
        data. */ 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:3000/barValue");
+    strcpy(url, "http://localhost:3000/");
+    strcat(url, route);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
     /* Now specify the POST data */ 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, param);
  

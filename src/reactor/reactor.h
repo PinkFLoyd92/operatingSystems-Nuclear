@@ -10,7 +10,7 @@
 
 #define NUM_THREADS 4
 #define MAX_BALANCE_TIME  10 // max of 5 seconds to balance the system
-#define MOVEMENT_TIME  2 // time used by the bar to move
+#define MOVEMENT_TIME  4 // time used by the bar to move
 #define CHANGE_DIRECTION  2 // time used by the bar to change direction
 enum Direction {UP = 1, DOWN = 0}; 
 

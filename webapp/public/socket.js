@@ -1,9 +1,15 @@
 var socket = io('http://localhost:9000');
+socket.on('state', function (x){
+    console.info(x.resource)
+})
 socket.on('barValue', function (x) {
     console.info(x.resource)
     for(var i = 0; i < data.length; i++) {
         if (data[i].id == parseInt(x.resource.id)){
             data[i].cm = parseInt(x.resource.cm);
+            // $("#barra"+data[i].id).val(data[i].cm)
+            $("#barra"+data[i].id).get( 0 ).MaterialSlider.change(data[i].cm)
+            $( "#bar"+data[i].id ).attr( "data-badge", x.resource.cm );
         }
     }
     console.info(data)
