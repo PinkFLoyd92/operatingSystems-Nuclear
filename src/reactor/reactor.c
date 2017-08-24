@@ -5,6 +5,12 @@ void
 start_threads(struct bar* bars){
   int i;
   pthread_t threads[NUM_THREADS + 1];
+  prio_mutex = (prio_lock_t*)malloc(sizeof(prio_lock_t));
+  pthread_mutex_init(&(prio_mutex->cv_mutex), NULL);
+  pthread_mutex_init(&(prio_mutex->cs_mutex), NULL);
+  pthread_cond_init(&(prio_mutex->cond), NULL);
+
+  bars = (struct bar*)malloc(sizeof(struct bar) * NUM_THREADS);
   init_variables();
   pthread_mutex_init(&bar_mutex, NULL);
   pthread_mutex_init(&write_mutex, NULL);
@@ -84,7 +90,7 @@ move_bar(void *bar){
   bool changed_direction = false;
   printf("Starting bar thread: id-> %ld", b->id);
   while(true){
-    pthread_mutex_trylock(&bar_mutex);
+    pthread_mutex_lock(&bar_mutex);
     //cuando se encuentre desbalanceado podremos ingresar y editar.
     printf("\nThread %ld is trying to star..................\n", b->id);
     while(unbalanced == false)
@@ -131,7 +137,7 @@ move_bar(void *bar){
     if((double)k_total != (double)1.0){
       unbalanced = true;
       // printf("\nUNBALANCED");
-      pthread_cond_broadcast(&unstable_state);
+      pthread_cond_signal(&unstable_state);
     }else{
       printf("\nBALANCED");
       unbalanced = false;
@@ -163,10 +169,10 @@ move_bar(void *bar){
     
     sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
     doPost("barValue",str);
-    printf("\nENding thread %ld", b->id);
+    printf("\nEnding thread %ld", b->id);
     changed_direction = false;
     pthread_mutex_unlock(&bar_mutex);
-    sleep(1);
+    sleep(1); 
   }
   pthread_exit(NULL);
 }
@@ -232,4 +238,43 @@ print_bars(struct bar* bars){
     printf("\nID: %ld", bars[i].id);
     printf("\nCM: %d", bars[i].cm);
   }
+}
+
+
+void prio_lock_low(prio_lock_t *prio_lock) {
+    pthread_mutex_lock(&prio_lock->cv_mutex);
+    while (prio_lock->high_waiters || pthread_mutex_trylock(&prio_lock->cs_mutex))
+    {
+        pthread_cond_wait(&prio_lock->cond, &prio_lock->cv_mutex);
+    }
+    pthread_mutex_unlock(&prio_lock->cv_mutex);
+}
+
+void prio_unlock_low(prio_lock_t *prio_lock) {
+    pthread_mutex_unlock(&prio_lock->cs_mutex);
+
+    pthread_mutex_lock(&prio_lock->cv_mutex);
+    if (!prio_lock->high_waiters)
+        pthread_cond_signal(&prio_lock->cond);
+    pthread_mutex_unlock(&prio_lock->cv_mutex);
+}
+
+void prio_lock_high(prio_lock_t *prio_lock)
+{
+    pthread_mutex_lock(&prio_lock->cv_mutex);
+    prio_lock->high_waiters++;
+    pthread_mutex_unlock(&prio_lock->cv_mutex);
+
+    pthread_mutex_lock(&prio_lock->cs_mutex);
+}
+
+void prio_unlock_high(prio_lock_t *prio_lock)
+{
+    pthread_mutex_unlock(&prio_lock->cs_mutex);
+
+    pthread_mutex_lock(&prio_lock->cv_mutex);
+    prio_lock->high_waiters--;
+    if (!prio_lock->high_waiters)
+        pthread_cond_signal(&prio_lock->cond);
+    pthread_mutex_unlock(&prio_lock->cv_mutex);
 }
