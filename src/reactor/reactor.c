@@ -32,7 +32,6 @@ start_threads(struct bar* bars){
   while(true){
     printf("\nREADING VALUE FROM USER: ");
     unstable_value = read_unstable_value();
-
     printf("\nValor leido: %lf\n", unstable_value);
   }
   
@@ -57,10 +56,10 @@ check_stable(void* bars){
     // printf("\nValor del k_total: %lf\n", k_total);
     if((double)k_total != (double)1.0){
        unbalanced = true;
-       printf("\nUnbalanced");
+       /* printf("\nUnbalanced"); */
        pthread_cond_signal(&unstable_state);
     }else{
-      printf("\nBALANCED");
+      /* printf("\nBALANCED"); */
       unbalanced = false;
     }
     pthread_mutex_unlock(&write_mutex);
@@ -88,19 +87,19 @@ move_bar(void *bar){
   //clock_t start_t;
   clock_t start = clock();
   bool changed_direction = false;
-  printf("Starting bar thread: id-> %ld", b->id);
+  /* printf("Starting bar thread: id-> %ld", b->id); */
   while(true){
     pthread_mutex_lock(&bar_mutex);
     //cuando se encuentre desbalanceado podremos ingresar y editar.
-    printf("\nThread %ld is trying to star..................\n", b->id);
+    /* printf("\nThread %ld is trying to star..................\n", b->id); */
     while(unbalanced == false)
       pthread_cond_wait(&unstable_state, &bar_mutex);
 
-    printf("\nThread %ld is starting..................\n", b->id);
+    /* printf("\nThread %ld is starting..................\n", b->id); */
     //start = time (0); //we begin to run the clock
     if (k_total < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
-      printf("\nThread yendo hacia abajo\n");
+      /* printf("\nThread yendo hacia abajo\n"); */
       if(b->direction == UP){
         b->direction = DOWN;
         changed_direction = true;
@@ -109,7 +108,7 @@ move_bar(void *bar){
       }
     }else if(k_total > 1 && b->cm >=-20){
       b->cm = b->cm - 10; //Usando este valor calculamos el deltak
-      printf("\nThread yendo hacia arriba\n");
+      /* printf("\nThread yendo hacia arriba\n"); */
       if(b->direction == DOWN){
         b->direction = UP;
         changed_direction = true;
@@ -169,7 +168,7 @@ move_bar(void *bar){
     
     sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
     doPost("barValue",str);
-    printf("\nEnding thread %ld", b->id);
+    /* printf("\nEnding thread %ld", b->id); */
     changed_direction = false;
     pthread_mutex_unlock(&bar_mutex);
     sleep(1); 
