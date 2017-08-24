@@ -52,7 +52,14 @@ check_stable(void* bars){
       k_total += getDeltaKValue(wires[i].cm);
     }
 
+    char str[25];
+    sprintf(str,"deltak=%lf", k_total);
+    doPost("deltak",str);
     k_total = k_value + k_total;
+    sprintf(str,"kparcial=%lf",k_value);
+    doPost("kparcial",str);
+    sprintf(str,"ktotal=%lf", k_total);
+    doPost("ktotal",str);
     // printf("\nValor del k_total: %lf\n", k_total);
     if((double)k_total != (double)1.0){
        unbalanced = true;
@@ -122,13 +129,13 @@ move_bar(void *bar){
       k_total += getDeltaKValue(bars[i].cm);
     }
     char str[25];
-    sprintf(str,"deltak=%lf", k_total);
-    doPost("deltak",str);
-    k_total = k_value + k_total;
-    sprintf(str,"kparcial=%lf",k_value);
-    doPost("kparcial",str);
-    sprintf(str,"ktotal=%lf", k_total);
-    doPost("ktotal",str);
+    /* sprintf(str,"deltak=%lf", k_total); */
+    /* doPost("deltak",str); */
+    /* k_total = k_value + k_total; */
+    /* sprintf(str,"kparcial=%lf",k_value); */
+    /* doPost("kparcial",str); */
+    /* sprintf(str,"ktotal=%lf", k_total); */
+    /* doPost("ktotal",str); */
     /* Thread ID, bar CM*/
     // printf("\nValor del k_total, %lf \n", k_total);
     // printf("\n%lf, %lf", (double)k_total, (double)1.0);
@@ -136,7 +143,7 @@ move_bar(void *bar){
     if((double)k_total != (double)1.0){
       unbalanced = true;
       // printf("\nUNBALANCED");
-      pthread_cond_signal(&unstable_state);
+      /* pthread_cond_signal(&unstable_state); */
     }else{
       printf("\nBALANCED");
       unbalanced = false;
