@@ -56,9 +56,9 @@ check_stable(void* bars){
     k_total = k_value + k_total;
     // printf("\nValor del k_total: %lf\n", k_total);
     if((double)k_total != (double)1.0){
-      unbalanced = true;
+       unbalanced = true;
        printf("\nUnbalanced");
-       pthread_cond_broadcast(&unstable_state);
+       pthread_cond_signal(&unstable_state);
     }else{
       printf("\nBALANCED");
       unbalanced = false;
