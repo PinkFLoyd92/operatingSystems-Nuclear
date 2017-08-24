@@ -65,14 +65,6 @@ check_stable(void* bars);
 void
 print_bars(struct bar* bars);
 
-void
-prio_lock_low(prio_lock_t *prio_lock);
-
-void
-prio_unlock_low(prio_lock_t *prio_lock);
-
-void prio_lock_high(prio_lock_t *prio_lock);
-
-void prio_unlock_high(prio_lock_t *prio_lock);
+void* ask_value(void* bars);
 
 #endif
