@@ -71,4 +71,8 @@ is_turn_available();
 
 int
 get_opposite_bar(int num);
+
+int
+select_first_bar_available();
+
 #endif

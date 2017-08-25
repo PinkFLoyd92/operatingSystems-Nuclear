@@ -114,6 +114,10 @@ check_stable(void* bars){
       turn_available = is_turn_available(); // we check if we have an available turn
       if(turn_available){
         selected_bar = (rand() % NUM_THREADS) + 1; //  selecting bar 1 to 16
+        if( turn[selected_bar - 1] == true){
+          selected_bar = select_first_bar_available();
+        }
+        turn[selected_bar - 1] =  true;
         pthread_cond_signal(&cond_bar[selected_bar - 1]);
         turn[selected_bar - 1] =  true;
 
@@ -302,4 +306,16 @@ is_turn_available(){
 int
 get_opposite_bar(int num){
     return NUM_THREADS - num + 1;
+}
+
+
+int
+select_first_bar_available(){
+  for (int i = 0; i < NUM_THREADS; ++i) {
+    if(turn[i] == false){
+      return i + 1;
+    }
+  }
+  return -1;
+
 }
