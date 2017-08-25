@@ -11,12 +11,13 @@
 #include "../socket/socket.h"
 
 #define NUM_THREADS 16
-#define MAX_BALANCE_TIME  20 // max of 4 seconds to balance the system
-#define MOVEMENT_TIME  5 // time used by the bar to move
-#define CHANGE_DIRECTION  10 // time used by the bar to change direction
+#define MAX_BALANCE_TIME  8 // max of 4 seconds to balance the system
+#define MOVEMENT_TIME  2 // time used by the bar to move
+#define CHANGE_DIRECTION  2 // time used by the bar to change direction
 enum Direction {UP = 1, DOWN = 0}; 
 
 pthread_mutex_t bar_mutex;  //mutex for handling the movement of each bar
+pthread_mutex_t read_unstable_mutex;  //mutex for handling the movement of each bar
 sem_t write_mutex;  //mutex for handling the movement of each bar
 pthread_cond_t unstable_state;
 pthread_attr_t attr;
@@ -28,6 +29,7 @@ struct bar{
   long id;
   enum Direction direction; 
   int cm; // cm representing the movement of the wire.
+  double deltak;
 };
 
 
@@ -61,5 +63,4 @@ void* ask_value(void* bars);
 
 void* count_unstable(void* bars);
 
-void w_total();
 #endif
