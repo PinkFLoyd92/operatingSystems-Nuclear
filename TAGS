@@ -1,40 +1,502 @@
 
+src/socket/socket.h,24
+#define _SOCKET_H_2,19
+
+src/socket/socket.c,13
+doPost(4,27
+
 src/main.c,11
-main 6,83
+main 5,55
 
-src/reactor/reactor.h,630
+src/reactor/reactor.h,1034
 #define _REACTOR_H_2,20
-#define NUM_THREADS 9,140
-#define MAX_BALANCE_TIME 10,162
-#define MOVEMENT_TIME 11,233
-#define CHANGE_DIRECTION 12,290
-enum Direction 13,362
-enum Direction {UP UP13,362
-enum Direction {UP = 1, DOWN 13,362
-double timeUnstabilized;15,399
-pthread_mutex_t bar_mutex;16,424
-pthread_cond_t unstable_state;17,498
-pthread_attr_t attr;18,551
-bool unbalanced;19,572
-double unstable_value,20,589
-double unstable_value, k_value,20,589
-double unstable_value, k_value, k_total;20,589
-struct bar{bar22,631
-  long id;23,643
-  enum Direction direction;24,654
-  int cm;25,683
-  double* k_value;26,738
+typedef struct prio_lock 11,190
+    pthread_cond_t cond;12,217
+    pthread_mutex_t cv_mutex;13,242
+    pthread_mutex_t cs_mutex;14,303
+    unsigned long high_waiters;15,362
+} prio_lock_t;16,394
+#define PRIO_LOCK_INITIALIZER 18,410
+#define NUM_THREADS 19,523
+#define MAX_BALANCE_TIME 20,545
+#define MOVEMENT_TIME 21,616
+#define CHANGE_DIRECTION 22,673
+enum Direction 23,745
+enum Direction {UP UP23,745
+enum Direction {UP = 1, DOWN 23,745
+prio_lock_t* prio_mutex;25,782
+double timeUnstabilized;26,807
+pthread_mutex_t bar_mutex;27,832
+pthread_mutex_t write_mutex;28,906
+pthread_cond_t unstable_state,29,982
+pthread_cond_t unstable_state, writer_state;29,982
+pthread_attr_t attr;30,1049
+bool unbalanced,31,1070
+bool unbalanced, isWriting;31,1070
+double unstable_value,32,1098
+double unstable_value, k_value,32,1098
+double unstable_value, k_value, k_total;32,1098
+struct bar* bars;33,1139
+struct bar{bar35,1158
+  long id;36,1170
+  enum Direction direction;37,1181
+  int cm;38,1210
 
-src/reactor/reactor.c,164
+src/reactor/reactor.c,228
 start_threads(5,114
-read_unstable_value(39,1017
-move_bar(48,1252
-unstabilize(101,2925
-fill_bar(114,3236
-getdeltakvalue(122,3420
-void init_variables(157,3729
+ask_value(37,1166
+count_unstable(46,1356
+check_stable(55,1551
+read_unstable_value(86,2271
+move_bar(94,2490
+fill_bar(154,4049
+getDeltaKValue(161,4143
+void init_variables(196,4452
+print_bars(204,4572
 
 src/ui/main_window.h,27
 #define MAIN_WINDOW_H2,22
+
+webapp/node_modules/socket.io/node_modules/uws/src/Backend.h,48
+#define BACKEND_H2,18
+#define USE_EPOLL11,256
+
+webapp/node_modules/socket.io/node_modules/uws/src/Epoll.h,1771
+#define EPOLL_H2,16
+typedef int uv_os_sock_t;13,195
+static const int UV_READABLE 14,221
+static const int UV_WRITABLE 15,261
+struct Timepoint 24,436
+    Timer *timer;timer26,480
+    std::chrono::system_clock::time_point timepoint;27,498
+    int nextDelay;28,551
+struct Loop 31,574
+    int epfd;32,588
+    int numPolls 33,602
+    bool cancelledLastTimer;34,624
+    int delay 35,653
+    epoll_event readyEvents[readyEvents36,673
+    std::chrono::system_clock::time_point timepoint;37,708
+    std::vector<Timepoint> timers;38,761
+    std::vector<std::vector39,796
+    std::vector<std::pair<Poll *, void (*)(Poll *)>> closing;39,796
+    void *preCbData,preCbData43,934
+    void *preCbData, *postCbData;postCbData43,934
+    Loop(45,969
+    static Loop *createLoop(createLoop50,1104
+    void destroy(54,1204
+    int getEpollFd(61,1293
+struct Timer 66,1347
+    Loop *loop;loop67,1362
+    void *data;data68,1378
+    Timer(70,1395
+    void start(74,1453
+    void setData(92,2212
+    void *getData(getData96,2277
+    void stop(101,2366
+    void close(118,2883
+struct Poll 124,2944
+        int fd 127,2982
+        unsigned int cbIndex 128,3003
+    } state 129,3037
+    Poll(131,3061
+    void setCb(138,3285
+    void (*getCb(getCb153,3686
+    void reInit(157,3774
+    void start(162,3877
+    void change(169,4090
+    void stop(176,4304
+    bool fastTransfer(181,4430
+    bool threadSafeChange(190,4683
+    void close(195,4811
+    bool isClosed(201,4943
+    uv_os_sock_t getFd(205,5003
+struct Async 213,5170
+    Loop *loop;loop215,5217
+    void *data;data216,5233
+    Async(218,5250
+    void start(222,5348
+    void send(233,5671
+    void close(240,5799
+    void setData(248,5952
+    void *getData(getData252,6017
+
+webapp/node_modules/socket.io/node_modules/uws/src/Extensions.h,260
+#define EXTENSIONS_UWS_H2,25
+enum Options 8,87
+    NO_OPTIONS 9,117
+    PERMESSAGE_DEFLATE 10,137
+    SERVER_NO_CONTEXT_TAKEOVER 11,165
+    CLIENT_NO_CONTEXT_TAKEOVER 12,201
+    NO_DELAY 13,237
+class ExtensionsNegotiator 17,283
+    int options;19,321
+
+webapp/node_modules/socket.io/node_modules/uws/src/WebSocket.h,281
+#define WEBSOCKET_UWS_H2,24
+    enum CompressionStatus 19,348
+        DISABLED,20,384
+        ENABLED,21,402
+        COMPRESSED_FRAME22,419
+    struct PreparedMessage 58,1971
+        char *buffer;buffer59,2000
+        size_t length;60,2022
+        int references;61,2045
+
+webapp/node_modules/socket.io/node_modules/uws/src/Socket.h,892
+#define SOCKET_UWS_H2,21
+struct TransferData 8,84
+    uv_os_sock_t fd;10,130
+    SSL *ssl;ssl11,151
+    void (*pollCb)pollCb14,184
+    int pollEvents;15,222
+    void *userData;userData18,261
+    NodeData *destination;destination21,301
+    void (*transferCb)transferCb22,328
+        int poll 29,455
+        int shuttingDown 30,477
+    struct Queue 38,640
+        struct Message 39,659
+            const char *data;data40,684
+            size_t length;41,714
+        void pop(48,1008
+        bool empty(60,1327
+        Message *front(front61,1374
+        void push(63,1415
+    struct Address 436,15382
+        unsigned int port;437,15403
+        const char *address;address438,15430
+        const char *family;family439,15459
+struct ListenSocket 495,16822
+    ListenSocket(497,16854
+    Timer *timer timer501,16974
+    uS::TLS::Context sslContext;502,17002
+
+webapp/node_modules/socket.io/node_modules/uws/src/Asio.h,1257
+#define ASIO_H2,15
+typedef boost::asio::ip::tcp::socket::native_type uv_os_sock_t;6,58
+static const int UV_READABLE 7,122
+static const int UV_WRITABLE 8,156
+struct Loop 10,191
+    static Loop *createLoop(createLoop12,232
+    void destroy(16,319
+    void run(20,368
+struct Timer 25,435
+    boost::asio::deadline_timer asio_timer;26,450
+    void *data;data27,494
+    Timer(29,511
+    void start(33,563
+    void setData(45,1006
+    void *getData(getData49,1071
+    void stop(56,1268
+    void close(60,1322
+struct Async 67,1440
+    Loop *loop;loop68,1455
+    void *data;data70,1496
+    boost::asio::io_service::work asio_work;72,1513
+    Async(74,1559
+    void start(77,1621
+    void send(81,1689
+    void close(87,1778
+    void setData(93,1871
+    void *getData(getData97,1936
+struct Poll 102,1989
+    boost::asio::posix::stream_descriptor *socket;socket103,2003
+    Poll(106,2104
+    bool isClosed(111,2258
+    boost::asio::ip::tcp::socket::native_type getFd(115,2311
+    void setCb(119,2428
+    void (*getCb(getCb123,2520
+    void reInit(127,2586
+    void start(133,2770
+    void change(153,3602
+    bool fastTransfer(158,3723
+    bool threadSafeChange(163,3857
+    void stop(167,3950
+    void close(174,4166
+
+webapp/node_modules/socket.io/node_modules/uws/src/Networking.h,883
+#define NETWORKING_UWS_H5,224
+#define SSL_CTX_up_ref(9,321
+#define SSL_up_ref(10,363
+#define MSG_NOSIGNAL 14,425
+#define htobe64(21,532
+#define be64toh(22,575
+#define NOMINMAX26,640
+#define SHUT_WR 30,736
+#define htobe64(33,817
+#define be64toh(34,857
+#define __thread 36,903
+#define htobe64(37,939
+#define be64toh(38,968
+#define pthread_t 39,997
+#define pthread_self 40,1021
+#define WIN32_EXPORT 42,1068
+inline void close(44,1112
+inline int setsockopt(45,1160
+inline SOCKET dup(49,1334
+#define SOCKET_ERROR 64,1778
+#define INVALID_SOCKET 65,1802
+#define WIN32_EXPORT66,1828
+struct Context 82,2183
+    mtcp_context *mctx;mctx85,2217
+    Context(88,2249
+    ~Context(95,2379
+    uv_os_sock_t acceptSocket(102,2501
+    uv_os_sock_t createSocket(122,3102
+    void closeSocket(140,3601
+    bool wouldBlock(148,3719
+    operator bool(operator bool183,4641
+
+webapp/node_modules/socket.io/node_modules/uws/src/addon.h,2376
+using namespace std;8,129
+using namespace v8;9,150
+uv_check_t check;12,194
+Persistent<Function> noop;13,212
+void registerCheck(15,240
+class NativeString 26,672
+    char *data;data27,693
+    size_t length;28,709
+    char utf8ValueMemory[utf8ValueMemory29,728
+    String::Utf8Value *utf8Value utf8Value30,781
+    NativeString(32,833
+    char *getData(getData60,2023
+    size_t getLength(61,2058
+    ~NativeString(62,2098
+struct GroupData 69,2202
+    Persistent<Function> connectionHandler,70,2221
+    Persistent<Function> connectionHandler, messageHandler,70,2221
+                         disconnectionHandler,71,2281
+                         disconnectionHandler, pingHandler,71,2281
+                         pongHandler,72,2341
+                         pongHandler, errorHandler,72,2341
+                         pongHandler, errorHandler, httpRequestHandler,72,2341
+                         httpUpgradeHandler,73,2413
+                         httpUpgradeHandler, httpCancelledRequestCallback;73,2413
+    int size 74,2488
+void createGroup(78,2535
+void deleteGroup(85,2845
+inline Local<External> wrapSocket(92,3090
+inline uWS::WebSocket<isServer> *unwrapSocket(unwrapSocket97,3255
+inline Local<Value> wrapMessage(101,3391
+inline Local<Value> getDataV8(106,3724
+void getUserData(111,3995
+void clearUserData(116,4192
+void setUserData(123,4494
+void getAddress(133,4903
+uv_handle_t *getTcpHandle(getTcpHandle143,5398
+struct SendCallbackData 152,5796
+    Persistent<Function> jsCallback;153,5822
+    Isolate *isolate;isolate154,5859
+void sendCallback(158,5910
+void send(170,6349
+void connect(189,7016
+struct Ticket 195,7346
+    uv_os_sock_t fd;196,7362
+    SSL *ssl;ssl197,7383
+void upgrade(200,7401
+void transfer(218,8102
+void onConnection(245,8944
+void onMessage(261,9777
+void onPing(277,10639
+void onPong(293,11494
+void onDisconnection(309,12349
+void onError(328,13409
+void closeSocket(347,14245
+void terminateSocket(353,14507
+void closeGroup(358,14664
+void terminateGroup(365,14976
+void broadcast(370,15144
+void prepareMessage(378,15534
+void sendPrepared(385,15901
+void finalizeMessage(391,16153
+void forEach(395,16355
+void getSize(407,16822
+void startAutoPing(413,17123
+void setNoop(419,17440
+void listen(423,17566
+struct Namespace 429,17807
+    Local<Object> object;430,17826
+    Namespace 431,17852
+
+webapp/node_modules/socket.io/node_modules/uws/src/HTTPSocket.h,1722
+#define HTTPSOCKET_UWS_H2,25
+struct Header 10,146
+    char *key,key11,162
+    char *key, *value;value11,162
+    unsigned int keyLength,12,185
+    unsigned int keyLength, valueLength;12,185
+    operator bool(14,227
+    std::string toString(19,309
+enum HttpMethod 24,396
+    METHOD_GET,25,414
+    METHOD_POST,26,430
+    METHOD_PUT,27,447
+    METHOD_DELETE,28,463
+    METHOD_PATCH,29,482
+    METHOD_OPTIONS,30,500
+    METHOD_HEAD,31,520
+    METHOD_TRACE,32,537
+    METHOD_CONNECT,33,555
+    METHOD_INVALID34,575
+struct HttpRequest 37,598
+    Header *headers;headers38,619
+    Header getHeader(39,640
+    HttpRequest(43,731
+    Header getHeader(45,797
+    Header getUrl(56,1123
+    HttpMethod getMethod(63,1260
+struct HttpResponse 137,3497
+    HttpSocket<true> *httpSocket;httpSocket138,3519
+    HttpResponse *next next139,3553
+    void *userData userData140,3587
+    void *extraUserData extraUserData141,3617
+    HttpSocket<true>::Queue::Message *messageQueue messageQueue142,3652
+    bool hasEnded 143,3714
+    bool hasHead 144,3741
+    HttpResponse(146,3768
+    static HttpResponse *allocateResponse(allocateResponse151,3879
+    void freeResponse(162,4286
+    void write(170,4494
+        struct NoopTransformer 174,4701
+            static size_t estimate(175,4734
+            static size_t transform(179,4850
+    void end(190,5249
+        struct TransformData 194,5462
+            bool hasHead;195,5493
+        struct HttpTransformer 198,5557
+            static size_t estimate(201,5643
+            static size_t transform(205,5765
+    void setUserData(270,8693
+    void *getUserData(getUserData274,8774
+    HttpSocket<true> *getHttpSocket(getHttpSocket278,8832
+
+webapp/node_modules/socket.io/node_modules/uws/src/Group.h,73
+#define GROUP_UWS_H2,20
+enum ListenOptions 12,169
+    TRANSFERS13,190
+
+webapp/node_modules/socket.io/node_modules/uws/src/Hub.h,165
+#define HUB_UWS_H2,18
+    struct ConnectionData 15,260
+        std::string path;16,288
+        void *user;user17,314
+        Group<CLIENT> *group;group18,334
+
+webapp/node_modules/socket.io/node_modules/uws/src/http.h,1130
+Persistent<Object> reqTemplate,3,21
+Persistent<Object> reqTemplate, resTemplate;3,21
+Persistent<Function> httpPersistent;4,66
+uWS::HttpRequest *currentReq currentReq6,104
+struct HttpServer 8,145
+    struct Request 10,166
+        static void on(11,187
+        static void headers(23,844
+        static void url(36,1531
+        static void method(40,1706
+        static void unpipe(75,3859
+        static void resume(79,4001
+        static void socket(83,4143
+        static Local<Object> getTemplateObject(88,4334
+    struct Response 109,5868
+        static void on(110,5890
+        static void end(120,6396
+        static void writeHead(134,7085
+        static void write(169,8695
+        static void setHeader(178,9056
+        static void getHeader(182,9204
+        static Local<Object> getTemplateObject(186,9352
+    static void createServer(201,10708
+    static void on(301,15640
+    static void listen(306,15893
+    static void getExpressApp(316,16425
+    static void getResponsePrototype(331,17135
+    static void getRequestPrototype(335,17325
+    static Local<Function> getHttpServer(339,17514
+
+webapp/node_modules/socket.io/node_modules/uws/src/Node.h,96
+#define NODE_UWS_H2,19
+enum ListenOptions 10,111
+    REUSE_PORT 11,138
+    ONLY_IPV4 12,158
+
+webapp/node_modules/socket.io/node_modules/uws/src/WebSocketProtocol.h,1068
+#define WEBSOCKETPROTOCOL_UWS_H2,32
+enum OpCode 12,222
+    TEXT 13,252
+    BINARY 14,266
+    CLOSE 15,282
+    PING 16,297
+    PONG 17,311
+    CLIENT,21,336
+    SERVER22,348
+struct WebSocketState 27,410
+    static const unsigned int SHORT_MESSAGE_HEADER 29,442
+    static const unsigned int MEDIUM_MESSAGE_HEADER 30,513
+    static const unsigned int LONG_MESSAGE_HEADER 31,585
+    struct State 34,674
+        unsigned int wantsHead 35,693
+        unsigned int spillLength 36,729
+        int opStack 37,767
+        unsigned int lastFin 38,804
+        unsigned char spill[spill41,859
+        OpCode opCode[opCode42,913
+        State(44,940
+    } state;51,1082
+    unsigned int remainingBytes 54,1111
+    char mask[mask55,1148
+template <const bool isServer,58,1185
+class WIN32_EXPORT WebSocketProtocol 59,1228
+        SND_CONTINUATION 104,3148
+        SND_NO_FIN 105,3178
+        SND_COMPRESSED 106,3202
+    struct CloseFrame 250,8842
+        uint16_t code;251,8866
+        char *message;message252,8889
+        size_t length;253,8912
+
+webapp/node_modules/socket.io/node_modules/uws/src/uWS.h,23
+#define UWS_UWS_H2,18
+
+webapp/node_modules/socket.io/node_modules/uws/src/Libuv.h,1014
+#define LIBUV_H2,16
+struct Loop 7,128
+    static Loop *createLoop(createLoop8,154
+    void destroy(16,360
+    void run(22,473
+struct Async 27,538
+    uv_async_t uv_async;28,553
+    Async(30,579
+    void start(34,640
+    void send(38,752
+    void close(42,811
+    void setData(48,946
+    void *getData(getData52,1014
+struct Timer 57,1076
+    uv_timer_t uv_timer;58,1091
+    Timer(60,1117
+    void start(64,1188
+    void setData(68,1324
+    void *getData(getData72,1392
+    void stop(76,1451
+    void close(80,1510
+    ~Timer(87,1654
+struct Poll 92,1680
+    uv_poll_t *uv_poll;uv_poll93,1694
+    void (*cb)cb94,1718
+    Poll(96,1768
+    Poll(101,1896
+    ~Poll(109,2056
+    bool isClosed(113,2101
+    uv_os_sock_t getFd(117,2185
+    void setCb(127,2393
+    void (*getCb(getCb131,2485
+    void reInit(135,2551
+    void start(141,2710
+    void change(149,2977
+    void stop(153,3072
+    bool fastTransfer(157,3138
+    bool threadSafeChange(161,3230
+    void close(165,3319
 
 src/ui/main_window.c,0
