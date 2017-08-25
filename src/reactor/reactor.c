@@ -80,6 +80,9 @@ count_unstable(void* bars){
 void*
 check_stable(void* bars){
   struct bar* wires = (struct bar*) bars ;
+  bool turn_available = false;
+  int selected_bar = -1;
+  srand ( time(NULL) );
   while (true) {
     if(system_off == true){
       pthread_exit(NULL);
@@ -108,6 +111,15 @@ check_stable(void* bars){
       if(unbalanced == false)
         pthread_cond_broadcast(&unstable_state);
       unbalanced = true;
+      turn_available = is_turn_available(); // we check if we have an available turn
+      if(turn_available){
+        selected_bar = (rand() % NUM_THREADS) + 1; //  selecting bar 1 to 16
+        pthread_cond_signal(&cond_bar[selected_bar - 1]);
+        turn[selected_bar - 1] =  true;
+
+        pthread_cond_signal(&cond_bar[get_opposite_bar(selected_bar) - 1]);
+        turn[get_opposite_bar(selected_bar) - 1] =  true;
+      }
       printf("\nDesbalanceado......");
     }else{
       unbalanced = false;
@@ -142,6 +154,11 @@ move_bar(void *bar){
     while(unbalanced == false){
       pthread_cond_wait(&unstable_state, &bar_mutex);
     }
+    // here we wait for the check_stable thread to activate this one.
+    while(turn[b->id - 1] == false){
+      pthread_cond_wait(&cond_bar[b->id - 1], &bar_mutex);
+    }
+
     sem_wait(&write_mutex);
     if (k_total < 1 && b->cm <=20) {
       if(b->direction == UP){
@@ -210,6 +227,7 @@ move_bar(void *bar){
       unbalanced = false;
     }
     printf("\nMOVEBAR releasing THE WRITE MUTEX.....ID: %ld", b->id);
+    turn[b->id - 1] = false;
     sem_post(&write_mutex);
     usleep(500);
 
@@ -254,6 +272,11 @@ void init_variables(){
   unbalanced = false;
   unstable_value = 0.0;
   k_value = 1.0;
+  for (int i = 0; i < NUM_THREADS; ++i) {
+    turn[i] = false;
+    pthread_cond_init(&cond_bar[i], NULL);
+  }
+
 }
 
 void
@@ -263,4 +286,20 @@ print_bars(struct bar* bars){
     printf("\nID: %ld", bars[i].id);
     printf("\nCM: %d", bars[i].cm);
   }
+}
+
+bool
+is_turn_available(){
+  for (int i = 0; i < NUM_THREADS; ++i) {
+    if(turn[i] == true)
+      return false;
+  }
+  return true;
+
+}
+
+// send a bar id: 1 to 16 and returns its opposite e.g 8 return 9 16 return 1
+int
+get_opposite_bar(int num){
+    return NUM_THREADS - num + 1;
 }

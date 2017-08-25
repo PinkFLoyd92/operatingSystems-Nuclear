@@ -32,6 +32,9 @@ struct bar{
   double deltak;
 };
 
+pthread_cond_t cond_bar[NUM_THREADS]; // currently we have 16 threads
+bool turn[NUM_THREADS];
+
 
 void*
 move_bar(void *bar); 
@@ -63,4 +66,9 @@ void* ask_value(void* bars);
 
 void* count_unstable(void* bars);
 
+bool
+is_turn_available();
+
+int
+get_opposite_bar(int num);
 #endif
