@@ -140,12 +140,12 @@ move_bar(void *bar){
   struct bar* b = (struct bar*) bar ;
   bool changed_direction = false;
   while(true){
-    pthread_mutex_lock(&bar_mutex);
-    if(system_off == true){
-      pthread_exit(NULL);
-    }
-    while(unbalanced == false){
-      pthread_cond_wait(&unstable_state, &bar_mutex);
+    // if(system_off == true){
+    //   pthread_exit(NULL);
+    // }
+    pthread_mutex_lock(&mutex_cond[b->id - 1]);
+    while(turn[b->id-1] == false){
+      pthread_cond_wait(&turn_cond[b->id - 1], &mutex_cond[b->id - 1]);
     }
     sem_wait(&write_mutex);
     printf("MOVE BAR GETTING THE WRITE MUTEX.....");
@@ -158,9 +158,8 @@ move_bar(void *bar){
       }else{
         changed_direction = false;
       }
-    }else if(k_total > 1 && b->cm >=-20){
-      b->cm = b->cm - 10; //Usando este valor calculamos el deltak
-      /* printf("\nThread yendo hacia arriba\n"); */
+    }else if(k_total > 1 && b->cm >=10){
+      b->cm = b->cm - 10;
       if(b->direction == DOWN){
         b->direction = UP;
         changed_direction = true;
@@ -168,6 +167,18 @@ move_bar(void *bar){
         changed_direction = false;
       }
     }
+
+    sem_post(&write_mutex);
+
+    printf("\nMOVE BAR release THE WRITE MUTEX.....with k_total %lf", k_total);
+    // pthread_mutex_unlock(&bar_mutex);
+    pthread_mutex_unlock(&mutex_cond[b->id - 1]);
+
+    if(changed_direction){
+      sleep(CHANGE_DIRECTION);
+    }
+    sleep(MOVEMENT_TIME);
+    sem_wait(&write_mutex);
     k_total = 0.0;
     for (int i = 0; i < NUM_THREADS; ++i) {
       k_total += bars[i].deltak;
@@ -181,19 +192,6 @@ move_bar(void *bar){
       printf("\nBALANCED");
       unbalanced = false;
     }
-
-
-    printf("\nMOVE BAR release THE WRITE MUTEX.....with k_total %lf", k_total);
-    sem_post(&write_mutex);
-    sleep(1);
-    pthread_mutex_unlock(&bar_mutex);
-
-    if(changed_direction){
-      sleep(CHANGE_DIRECTION);
-    }
-    sleep(MOVEMENT_TIME);
-
-    sem_wait(&write_mutex);
     sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
     doPost("barValue",str);
     sem_post(&write_mutex);
