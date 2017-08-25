@@ -16,18 +16,26 @@
 #define CHANGE_DIRECTION  10 // time used by the bar to change direction
 enum Direction {UP = 1, DOWN = 0}; 
 
-pthread_mutex_t bar_mutex;  //mutex for handling the movement of each bar
-sem_t write_mutex;  //mutex for handling the movement of each bar
+pthread_mutex_t bar_mutex;
+pthread_mutex_t readK_mutex;
+sem_t write_mutex;
 pthread_cond_t unstable_state;
 pthread_attr_t attr;
 bool unbalanced, system_off;
 double unstable_value, k_value, k_total;
 struct bar* bars;
 
+// usados para el movimiento a pares.
+pthread_cond_t turn_cond[NUM_THREADS];
+pthread_mutex_t mutex_cond[NUM_THREADS];
+bool turn[NUM_THREADS];
+
+
 struct bar{
   long id;
   enum Direction direction; 
   int cm; // cm representing the movement of the wire.
+  double deltak;
 };
 
 
@@ -40,7 +48,7 @@ count_time(void *time);
 void
 start_threads(struct bar* bars);
 
-double getDeltaKValue(int val);
+double getKValue(int val);
 
 double
 read_unstable_value();
@@ -61,5 +69,9 @@ void* ask_value(void* bars);
 
 void* count_unstable(void* bars);
 
-void w_total();
+void
+init_turn_conds();
+
+bool
+areTurnsOff();
 #endif

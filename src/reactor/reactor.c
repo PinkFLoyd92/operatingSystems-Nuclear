@@ -6,17 +6,19 @@ start_threads(struct bar* bars){
   int i;
   pthread_t threads[NUM_THREADS + 3];
   init_variables();
+  init_turn_conds();
   pthread_mutex_init(&bar_mutex, NULL);
+  pthread_mutex_init(&readK_mutex, NULL);
   int res = sem_init(&write_mutex, 0, 0);
-if (res < 0)
+  if (res < 0)
     {
-        perror("Semaphore initialization failed");
-        exit(0);
+      perror("Semaphore initialization failed");
+      exit(0);
     }
-    if (sem_init(&write_mutex, 0, 1)) /* initially unlocked */
+  if (sem_init(&write_mutex, 0, 1)) /* initially unlocked */
     {
-        perror("Semaphore initialization failed");
-        exit(0);
+      perror("Semaphore initialization failed");
+      exit(0);
     }
 
   pthread_cond_init(&unstable_state, NULL);
@@ -91,14 +93,16 @@ check_stable(void* bars){
     printf("\nCHECKSTABLE getting THE WRITE MUTEX.....");
     k_total = 0.0;
     for (int i = 0; i < NUM_THREADS; ++i) {
-      k_total += getDeltaKValue(wires[i].cm);
+      k_total += getKValue(wires[i].cm);
     }
 
     char str[25];
     sprintf(str,"deltak=%lf", k_total);
     doPost("deltak",str);
 
+    pthread_mutex_lock(&readK_mutex);
     k_total = k_value + k_total;
+    pthread_mutex_unlock(&readK_mutex);
 
     sprintf(str,"kparcial=%lf",k_value);
     doPost("kparcial",str);
@@ -113,9 +117,9 @@ check_stable(void* bars){
     }
     printf("\nCHECKSTABLE release THE WRITE MUTEX.....k_total %lf", k_total);
     sem_post(&write_mutex);
-    sleep(1);
+    usleep(500);
     pthread_mutex_unlock(&bar_mutex);
-    sleep(1);
+    usleep(500);
   }
 }
 
@@ -123,7 +127,11 @@ double
 read_unstable_value(){
   printf("\nEnter the value to unstabilize the system: ");
   scanf("%lf", &unstable_value);
+
+  pthread_mutex_lock(&readK_mutex);
   k_value = k_value + unstable_value; // de una vez calculamos el valor de k
+  pthread_mutex_unlock(&readK_mutex);
+
   return k_value;
 }
 
@@ -141,7 +149,6 @@ move_bar(void *bar){
     }
     sem_wait(&write_mutex);
     printf("MOVE BAR GETTING THE WRITE MUTEX.....");
-    w_total();
     if (k_total < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
       /* printf("\nThread yendo hacia abajo\n"); */
@@ -163,8 +170,8 @@ move_bar(void *bar){
     }
     k_total = 0.0;
     for (int i = 0; i < NUM_THREADS; ++i) {
-      k_total += getDeltaKValue(bars[i].cm);
-      printf("\nvalor: %lf", getDeltaKValue(bars[i].cm));
+      k_total += bars[i].deltak;
+      printf("\nvalor: %lf", getKValue(bars[i].cm));
     }
     k_total = k_value + k_total;
     char str[25];
@@ -193,7 +200,7 @@ move_bar(void *bar){
 
     /* printf("\nEnding thread %ld", b->id); */
     changed_direction = false;
-    sleep(1);
+    usleep(500);
   }
   pthread_exit(NULL);
 }
@@ -202,11 +209,12 @@ void
 fill_bar(struct bar* b, long id){
   b->id = id;
   b->cm = 0;
+  b->deltak = 0;
   b->direction = DOWN;
 }
 
 double
-getDeltaKValue(int cm){
+getKValue(int cm){
   switch (cm) {
 
   case 0: {
@@ -221,18 +229,6 @@ getDeltaKValue(int cm){
   }
   case 30: {
     return 0.6;
-  }
-
-  case -10: {
-    return -0.1;
-  }
-
-  case -20: {
-    return -0.4;
-  }
-
-  case -30: {
-    return -0.6;
   }
 
   default:
@@ -258,8 +254,19 @@ print_bars(struct bar* bars){
 }
 
 void
-w_total(){
-    if((double)k_total == 0.0){
-      usleep(500);
-    }
+init_turn_conds(){
+  for (int i = 0; i < NUM_THREADS; ++i) {
+    pthread_cond_init(&turn_cond[i], NULL);
+    turn[i] = false;
+    pthread_mutex_init(&mutex_cond[i], NULL);
+  }
+}
+
+bool
+areTurnsOff(){
+  for (int i = 0; i < NUM_THREADS; ++i) {
+    if(turn[i] == true)
+      return false;
+  }
+  return true;
 }
