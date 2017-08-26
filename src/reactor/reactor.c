@@ -151,6 +151,7 @@ read_unstable_value(){
 void*
 move_bar(void *bar){
   struct bar* b = (struct bar*) bar ;
+  double k_tmp = 0.0;
   char str[25];
   bool changed_direction = false;
   while(true){
@@ -188,6 +189,7 @@ move_bar(void *bar){
       printf("La barra esta estatica");
       //b->deltak = 0;
     }
+    k_tmp = k_total;
     sem_post(&write_mutex);
     usleep(500);
     pthread_mutex_unlock(&bar_mutex);
@@ -199,18 +201,46 @@ move_bar(void *bar){
       sleep(CHANGE_DIRECTION); //animacion del cambio de direccion
     doPost("change_direction",str);
     }
-    if (k_total < 1 && b->cm <=20) {
-    sleep(MOVEMENT_TIME); 
-    }else if(k_total > 1 && b->cm >=10){
-    sleep(MOVEMENT_TIME); 
+    if (k_tmp < 1 && b->cm <=20) {
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm + 2);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm + 4);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm + 6);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm + 8);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm + 10);
+    doPost("barValue",str);
+    }else if(k_tmp > 1 && b->cm >=10){
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 2);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 4);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 6);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 8);
+    doPost("barValue",str);
+    sleep(MOVEMENT_TIME/5); 
+    sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 10);
+    doPost("barValue",str);
     }
     printf("\nMOVEBAR getting THE WRITE MUTEX.....ID: %ld", b->id);
 
     sem_wait(&write_mutex);
-    if (k_total < 1 && b->cm <=20) {
+    if (k_tmp < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
       b->deltak = getDeltaKValue(b->cm) - getDeltaKValue(b->cm -10) ;
-    }else if(k_total > 1 && b->cm >=10){
+    }else if(k_tmp > 1 && b->cm >=10){
       b->cm = b->cm - 10;
       b->deltak = getDeltaKValue(b->cm) - getDeltaKValue(b->cm +10) ;
     }
