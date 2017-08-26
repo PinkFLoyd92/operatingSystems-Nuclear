@@ -111,7 +111,10 @@ check_stable(void* bars){
     doPost("ktotal",str);
 
     pthread_mutex_unlock(&read_unstable_mutex);
-    printf("\nktotal......%lf", k_total);
+    printf("\nktotal......%lf, %lf", k_total, (double)k_total);
+    if(k_total == 1){
+      printf("\nsucessss");
+    }
     if((double)k_total != (double)1.0){
       if(unbalanced == false)
         pthread_cond_broadcast(&unstable_state);
@@ -135,9 +138,10 @@ check_stable(void* bars){
       unbalanced = false;
       printf("\nBalanceado......");
     }
+    usleep(500);
     sem_post(&write_mutex);
     pthread_mutex_unlock(&bar_mutex);
-    sleep(1);
+    usleep(500);
   }
 }
 
@@ -173,6 +177,7 @@ move_bar(void *bar){
     }
     flag_ktotal = false;
     sem_wait(&write_mutex);
+    printf("\nENTRANDO MOVEBAR, ID: %ld", b->id);
     if (k_total < 1 && b->cm <=20) {
       if(b->direction == UP){
         b->direction = DOWN;
@@ -239,7 +244,6 @@ move_bar(void *bar){
     doPost("barValue",str);
     }
     printf("\nMOVEBAR getting THE WRITE MUTEX.....ID: %ld", b->id);
-
     sem_wait(&write_mutex);
     if (k_tmp < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
@@ -252,9 +256,10 @@ move_bar(void *bar){
     sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
     doPost("barValue",str);
     turn[b->id - 1] = false;
+    printf("\nbar_move dejando el mutex  %ld", b->id);
+    sem_post(&write_mutex);
     flag_ktotal = true;
     pthread_cond_signal(&ktotal_cond);
-    sem_post(&write_mutex);
     usleep(500);
 
   }

@@ -12,8 +12,8 @@
 
 #define NUM_THREADS 16
 #define MAX_BALANCE_TIME  8 // max of 4 seconds to balance the system
-#define MOVEMENT_TIME  2 // time used by the bar to move
-#define CHANGE_DIRECTION  2 // time used by the bar to change direction
+#define MOVEMENT_TIME  3 // time used by the bar to move
+#define CHANGE_DIRECTION  3 // time used by the bar to change direction
 enum Direction {UP = 1, DOWN = 0}; 
 
 pthread_mutex_t bar_mutex;  //mutex for handling the movement of each bar
