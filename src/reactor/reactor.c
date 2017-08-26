@@ -23,7 +23,7 @@ if (res < 0) {
   for (i = 1; i < NUM_THREADS + 1; i++) {
     fill_bar(&bars[i - 1], i);
   }
-  print_bars(bars);
+  // print_bars(bars);
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   // creating the 4 threads that handle each bar
@@ -111,11 +111,10 @@ check_stable(void* bars){
     doPost("ktotal",str);
 
     pthread_mutex_unlock(&read_unstable_mutex);
-    printf("\nktotal......%lf, %lf", k_total, (double)k_total);
-    if(k_total == 1){
-      printf("\nsucessss");
-    }
-    if((double)k_total != (double)1.0){
+    usleep(500);
+    // printf("\nktotal......%lf, %lf", k_total, (double)k_total);
+    if(!(fabs(k_total - 1.0) < (DBL_EPSILON * fabs(k_total + 1.0)))){
+      // printf("\nLAAAAAAAAAA %lf", (double)k_total);
       if(unbalanced == false)
         pthread_cond_broadcast(&unstable_state);
       unbalanced = true;
@@ -133,13 +132,13 @@ check_stable(void* bars){
         turn[get_opposite_bar(selected_bar) - 1] =  true;
         flag_ktotal = false;
       }
-      printf("\nDesbalanceado......");
+      // printf("\nDesbalanceado......");
     }else{
       unbalanced = false;
-      printf("\nBalanceado......");
+      // printf("\nBalanceado......");
     }
-    usleep(500);
     sem_post(&write_mutex);
+    usleep(500);
     pthread_mutex_unlock(&bar_mutex);
     usleep(500);
   }
@@ -177,7 +176,7 @@ move_bar(void *bar){
     }
     flag_ktotal = false;
     sem_wait(&write_mutex);
-    printf("\nENTRANDO MOVEBAR, ID: %ld", b->id);
+    // printf("\nENTRANDO MOVEBAR, ID: %ld", b->id);
     if (k_total < 1 && b->cm <=20) {
       if(b->direction == UP){
         b->direction = DOWN;
@@ -185,7 +184,7 @@ move_bar(void *bar){
       }else{
         changed_direction = false;
       }
-      printf("\nMoviendo hacia abajo: %ld", b->id);
+      // printf("\nMoviendo hacia abajo: %ld", b->id);
     }else if(k_total > 1 && b->cm >=10){
       if(b->direction == DOWN){
         b->direction = UP;
@@ -193,9 +192,9 @@ move_bar(void *bar){
       }else{
         changed_direction = false;
       }
-      printf("\nMoviendo hacia arriba barra: %ld", b->id);
+      // printf("\nMoviendo hacia arriba barra: %ld", b->id);
     }else{
-      printf("La barra esta estatica");
+      // printf("La barra esta estatica");
       //b->deltak = 0;
     }
     k_tmp = k_total;
@@ -243,7 +242,7 @@ move_bar(void *bar){
     sprintf(str,"id=%ld&cm=%d",b->id, b->cm - 10);
     doPost("barValue",str);
     }
-    printf("\nMOVEBAR getting THE WRITE MUTEX.....ID: %ld", b->id);
+    // printf("\nMOVEBAR getting THE WRITE MUTEX.....ID: %ld", b->id);
     sem_wait(&write_mutex);
     if (k_tmp < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
@@ -256,7 +255,7 @@ move_bar(void *bar){
     sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
     doPost("barValue",str);
     turn[b->id - 1] = false;
-    printf("\nbar_move dejando el mutex  %ld", b->id);
+    // printf("\nbar_move dejando el mutex  %ld", b->id);
     sem_post(&write_mutex);
     flag_ktotal = true;
     pthread_cond_signal(&ktotal_cond);

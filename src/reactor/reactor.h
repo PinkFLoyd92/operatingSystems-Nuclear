@@ -8,6 +8,8 @@
 #include <string.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <math.h>
+#include <float.h>
 #include "../socket/socket.h"
 
 #define NUM_THREADS 16
@@ -33,7 +35,7 @@ struct bar{
 };
 
 pthread_cond_t cond_bar[NUM_THREADS]; // currently we have 16 threads
-bool turn[NUM_THREADS];
+bool turn[NUM_THREADS]; //used along with the cond_bars
 
 
 void*
