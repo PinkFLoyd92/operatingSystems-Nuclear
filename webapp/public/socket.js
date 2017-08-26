@@ -11,6 +11,15 @@ socket.on('kparcial', function (x){
 socket.on('deltak', function (x) {
     $( "#deltak" ).text(x.resource.deltak );
 })
+
+socket.on('exit', function (x) {
+    alert("MURIO EL SISTEMA :( :( ")
+})
+
+socket.on('change_direction', function (x) {
+    console.info(x.resource)
+    $( "#switch-"+x.resource.id ).click()
+})
 socket.on('barValue', function (x) {
     console.info(x.resource)
     for(var i = 0; i < data.length; i++) {
@@ -21,7 +30,6 @@ socket.on('barValue', function (x) {
             $( "#bar"+data[i].id ).attr( "data-badge", x.resource.cm );
         }
     }
-    console.info(data)
   svg.selectAll("*").remove()
   series = d3.stack()
              .keys(["cm"])

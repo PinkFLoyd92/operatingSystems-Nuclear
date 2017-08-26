@@ -54,6 +54,12 @@ app.post('/ktotal', function(req, res) {
     res.send('');
 });
 
+app.post('/change_direction', function(req, res) {
+    console.log(req.body)
+    req.app.io.emit('change_direction', {resource:req.body});
+    res.send('');
+});
+
 app.post('/exit', function(req, res) {
     req.app.io.emit('exit', {});
     res.send('');

@@ -63,12 +63,11 @@ count_unstable(void* bars){
     if(1.5 > (double)k_total && (double)k_total> 0.5){
       start = clock(); // here we restart the clock
     }
-    printf("\nVALOR TOTAL: %lf, %lf, %lf", ((double) (clock() - start)) / CLOCKS_PER_SEC, (double)k_total, k_total);
     // printf("release THE WRITE MUTEX.....");
     sem_post(&write_mutex);
     usleep(500);
 
-    if(((double) (clock() - start)) / CLOCKS_PER_SEC > 1){
+    if(((double) (clock() - start)) / CLOCKS_PER_SEC > MAX_BALANCE_TIME){
       pthread_mutex_lock(&bar_mutex);
       sprintf(str,"exit=0");
       doPost("exit",str);
@@ -152,6 +151,7 @@ read_unstable_value(){
 void*
 move_bar(void *bar){
   struct bar* b = (struct bar*) bar ;
+  char str[25];
   bool changed_direction = false;
   while(true){
     changed_direction = false;
@@ -194,12 +194,15 @@ move_bar(void *bar){
     usleep(500);
     // aqui ejecutamos el movimiento
     if(changed_direction){
+    sprintf(str,"id=%ld", b->id);
+    doPost("change_direction",str);
       sleep(CHANGE_DIRECTION); //animacion del cambio de direccion
+    doPost("change_direction",str);
     }
     if (k_total < 1 && b->cm <=20) {
-    sleep(MOVEMENT_TIME); // animacion del cambio de movimiento
+    sleep(MOVEMENT_TIME); 
     }else if(k_total > 1 && b->cm >=10){
-    sleep(MOVEMENT_TIME); // animacion del cambio de movimiento
+    sleep(MOVEMENT_TIME); 
     }
     printf("\nMOVEBAR getting THE WRITE MUTEX.....ID: %ld", b->id);
 
