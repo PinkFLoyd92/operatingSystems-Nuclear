@@ -60,7 +60,7 @@ count_unstable(void* bars){
   clock_t start = clock();
   while(true){
     sem_wait(&write_mutex);
-    if(1.5 > (double)k_total > 0.5){
+    if(1.5 > (double)k_total && (double)k_total> 0.5){
       start = clock(); // here we restart the clock
     }
     printf("\nVALOR TOTAL: %lf, %lf, %lf", ((double) (clock() - start)) / CLOCKS_PER_SEC, (double)k_total, k_total);
