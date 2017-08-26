@@ -56,6 +56,7 @@ ask_value(void* bars){
 // This is runnning in a thread checking the time that the system is unstable...
 void*
 count_unstable(void* bars){
+  char str[25];
   clock_t start = clock();
   while(true){
     sem_wait(&write_mutex);
@@ -67,9 +68,11 @@ count_unstable(void* bars){
     sem_post(&write_mutex);
     usleep(500);
 
-    if(((double) (clock() - start)) / CLOCKS_PER_SEC > MAX_BALANCE_TIME){
+    if(((double) (clock() - start)) / CLOCKS_PER_SEC > 1){
       pthread_mutex_lock(&bar_mutex);
-      printf("lalalalalaaaaaaaaaaaa");
+      sprintf(str,"exit=0");
+      doPost("exit",str);
+      exit(0);
       system_off = true;
       pthread_mutex_unlock(&bar_mutex);
       usleep(500);
@@ -151,6 +154,7 @@ move_bar(void *bar){
   struct bar* b = (struct bar*) bar ;
   bool changed_direction = false;
   while(true){
+    changed_direction = false;
     pthread_mutex_lock(&bar_mutex);
     if(system_off == true){
       pthread_exit(NULL);
@@ -192,9 +196,14 @@ move_bar(void *bar){
     if(changed_direction){
       sleep(CHANGE_DIRECTION); //animacion del cambio de direccion
     }
+    if (k_total < 1 && b->cm <=20) {
     sleep(MOVEMENT_TIME); // animacion del cambio de movimiento
-    sem_wait(&write_mutex);
+    }else if(k_total > 1 && b->cm >=10){
+    sleep(MOVEMENT_TIME); // animacion del cambio de movimiento
+    }
     printf("\nMOVEBAR getting THE WRITE MUTEX.....ID: %ld", b->id);
+
+    sem_wait(&write_mutex);
     if (k_total < 1 && b->cm <=20) {
       b->cm = b->cm + 10; //Usando este valor calculamos el deltak
       b->deltak = getDeltaKValue(b->cm) - getDeltaKValue(b->cm -10) ;
@@ -202,7 +211,6 @@ move_bar(void *bar){
       b->cm = b->cm - 10;
       b->deltak = getDeltaKValue(b->cm) - getDeltaKValue(b->cm +10) ;
     }
-
     k_total = 0.0;
     for (int i = 0; i < NUM_THREADS; ++i) {
       k_total += bars[i].deltak;
@@ -223,13 +231,13 @@ move_bar(void *bar){
 
     pthread_mutex_unlock(&read_unstable_mutex);
 
-    if((double)k_total != (double)1.0){
-      if(unbalanced == false)
-        pthread_cond_broadcast(&unstable_state);
-      unbalanced = true;
-    }else{
-      unbalanced = false;
-    }
+    // if((double)k_total != (double)1.0){
+    //   if(unbalanced == false)
+    //     pthread_cond_broadcast(&unstable_state);
+    //   unbalanced = true;
+    // }else{
+    //   unbalanced = false;
+    // }
     printf("\nMOVEBAR releasing THE WRITE MUTEX.....ID: %ld", b->id);
     turn[b->id - 1] = false;
     sem_post(&write_mutex);

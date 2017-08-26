@@ -20,6 +20,9 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);  //pass a http.Server instance
 server.listen(9000);  
 
+app.get('/ip',function (req, res) {
+    res.send(ip.address())
+})
 
 app.get('/', function(req, res) {
     res.render('home');
@@ -48,6 +51,11 @@ app.post('/kparcial', function(req, res) {
 app.post('/ktotal', function(req, res) {
     console.log(req.body)
     req.app.io.emit('ktotal', {resource:req.body});
+    res.send('');
+});
+
+app.post('/exit', function(req, res) {
+    req.app.io.emit('exit', {});
     res.send('');
 });
 

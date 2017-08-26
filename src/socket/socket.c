@@ -15,7 +15,9 @@ doPost(char* route, char* param) {
     /* First set the URL that is about to receive our POST. This URL can
        just as well be a https:// URL if that is what should receive the
        data. */ 
-    strcpy(url, "http://localhost:3000/");
+    strcpy(src, "");
+    strcat(src, IP_ADDRESS);
+    strcpy(url, strcat(src,":3000/"));
     strcat(url, route);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     /* Now specify the POST data */ 

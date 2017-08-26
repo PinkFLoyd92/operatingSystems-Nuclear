@@ -1,4 +1,7 @@
-var socket = io('http://localhost:9000');
+$.ajax({url: "/ip", success: function(ipAddress){
+    console.info("The IP Adress is: ", ipAddress, ". The complete URL of the server is ", 'http://'+ipAddress+':9000');
+    var socket = io('http://'+ipAddress+':9000');
+//var socket = io('http://localhost:9000');
 socket.on('ktotal', function (x){
     $( "#ktotal" ).text(x.resource.ktotal );
 })
@@ -62,3 +65,5 @@ var y = d3.scaleLinear()
         .call(d3.axisLeft(y));
 
 });
+
+    }});
