@@ -18,6 +18,7 @@ if (res < 0) {
  }
 
   pthread_cond_init(&unstable_state, NULL);
+  pthread_cond_init(&ktotal_cond, NULL);
 
   for (i = 1; i < NUM_THREADS + 1; i++) {
     fill_bar(&bars[i - 1], i);
@@ -90,8 +91,10 @@ check_stable(void* bars){
       pthread_exit(NULL);
     }
     pthread_mutex_lock(&bar_mutex);
+    while(!flag_ktotal){
+      pthread_cond_wait(&ktotal_cond, &bar_mutex);
+    }
     sem_wait(&write_mutex);
-    // printf("\nCHECKSTABLE getting THE WRITE MUTEX.....");
     k_total = 0.0;
     for (int i = 0; i < NUM_THREADS; ++i) {
       k_total += wires[i].deltak;
@@ -108,7 +111,7 @@ check_stable(void* bars){
     doPost("ktotal",str);
 
     pthread_mutex_unlock(&read_unstable_mutex);
-
+    printf("\nktotal......%lf", k_total);
     if((double)k_total != (double)1.0){
       if(unbalanced == false)
         pthread_cond_broadcast(&unstable_state);
@@ -125,6 +128,7 @@ check_stable(void* bars){
 
         pthread_cond_signal(&cond_bar[get_opposite_bar(selected_bar) - 1]);
         turn[get_opposite_bar(selected_bar) - 1] =  true;
+        flag_ktotal = false;
       }
       printf("\nDesbalanceado......");
     }else{
@@ -167,7 +171,7 @@ move_bar(void *bar){
     while(turn[b->id - 1] == false){
       pthread_cond_wait(&cond_bar[b->id - 1], &bar_mutex);
     }
-
+    flag_ktotal = false;
     sem_wait(&write_mutex);
     if (k_total < 1 && b->cm <=20) {
       if(b->direction == UP){
@@ -244,35 +248,12 @@ move_bar(void *bar){
       b->cm = b->cm - 10;
       b->deltak = getDeltaKValue(b->cm) - getDeltaKValue(b->cm +10) ;
     }
-    k_total = 0.0;
-    for (int i = 0; i < NUM_THREADS; ++i) {
-      k_total += bars[i].deltak;
-    }
 
-    char str[25];
-    sprintf(str,"deltak=%lf", k_total);
-    doPost("deltak",str);
-
-    pthread_mutex_lock(&read_unstable_mutex);
     sprintf(str,"id=%ld&cm=%d",b->id, b->cm);
     doPost("barValue",str);
-    k_total = k_value + k_total;
-    sprintf(str,"kparcial=%lf",k_value);
-    doPost("kparcial",str);
-    sprintf(str,"ktotal=%lf", k_total);
-    doPost("ktotal",str);
-
-    pthread_mutex_unlock(&read_unstable_mutex);
-
-    // if((double)k_total != (double)1.0){
-    //   if(unbalanced == false)
-    //     pthread_cond_broadcast(&unstable_state);
-    //   unbalanced = true;
-    // }else{
-    //   unbalanced = false;
-    // }
-    printf("\nMOVEBAR releasing THE WRITE MUTEX.....ID: %ld", b->id);
     turn[b->id - 1] = false;
+    flag_ktotal = true;
+    pthread_cond_signal(&ktotal_cond);
     sem_post(&write_mutex);
     usleep(500);
 
@@ -317,6 +298,7 @@ void init_variables(){
   unbalanced = false;
   unstable_value = 0.0;
   k_value = 1.0;
+  flag_ktotal = true;
   for (int i = 0; i < NUM_THREADS; ++i) {
     turn[i] = false;
     pthread_cond_init(&cond_bar[i], NULL);

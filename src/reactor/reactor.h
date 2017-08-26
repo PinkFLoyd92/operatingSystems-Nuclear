@@ -19,9 +19,9 @@ enum Direction {UP = 1, DOWN = 0};
 pthread_mutex_t bar_mutex;  //mutex for handling the movement of each bar
 pthread_mutex_t read_unstable_mutex;  //mutex for handling the movement of each bar
 sem_t write_mutex;  //mutex for handling the movement of each bar
-pthread_cond_t unstable_state;
+pthread_cond_t unstable_state, ktotal_cond;
 pthread_attr_t attr;
-bool unbalanced, system_off;
+bool unbalanced, system_off, flag_ktotal;
 double unstable_value, k_value, k_total;
 struct bar* bars;
 
