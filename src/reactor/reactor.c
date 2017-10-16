@@ -110,11 +110,9 @@ check_stable(void* bars){
     sprintf(str,"ktotal=%lf", k_total);
     doPost("ktotal",str);
 
-    pthread_mutex_unlock(&read_unstable_mutex);
-    usleep(500);
-    // printf("\nktotal......%lf, %lf", k_total, (double)k_total);
+    printf("\nktotal......%lf, %lf", k_total, (double)k_total);
     if(!(fabs(k_total - 1.0) < (DBL_EPSILON * fabs(k_total + 1.0)))){
-      // printf("\nLAAAAAAAAAA %lf", (double)k_total);
+      /* printf("\nLAAAAAAAAAA %lf", (double)k_total); */
       if(unbalanced == false)
         pthread_cond_broadcast(&unstable_state);
       unbalanced = true;
@@ -135,8 +133,12 @@ check_stable(void* bars){
       // printf("\nDesbalanceado......");
     }else{
       unbalanced = false;
-      // printf("\nBalanceado......");
+      usleep(500);
+      printf("\nBalanceado......");
     }
+
+    pthread_mutex_unlock(&read_unstable_mutex);
+    usleep(500);
     sem_post(&write_mutex);
     usleep(500);
     pthread_mutex_unlock(&bar_mutex);
@@ -258,7 +260,8 @@ move_bar(void *bar){
     // printf("\nbar_move dejando el mutex  %ld", b->id);
     sem_post(&write_mutex);
     flag_ktotal = true;
-    pthread_cond_signal(&ktotal_cond);
+    pthread_cond_broadcast(&ktotal_cond);
+    unbalanced = true;
     usleep(500);
 
   }
@@ -322,10 +325,10 @@ print_bars(struct bar* bars){
 bool
 is_turn_available(){
   for (int i = 0; i < NUM_THREADS; ++i) {
-    if(turn[i] == true)
-      return false;
+    if(turn[i] == false)
+      return true;
   }
-  return true;
+  return false;
 
 }
 

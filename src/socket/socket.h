@@ -4,8 +4,8 @@
 #include <curl/curl.h>
 #include <string.h>
 
-#define IP_ADDRESS "104.131.14.115"
-/* #define IP_ADDRESS "localhost" */
+/* #define IP_ADDRESS "104.131.14.115" */
+#define IP_ADDRESS "localhost"
 char src[50];
 
 int
